@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>숫자 맞히기 게임</title>
+<style>
+  body {
+    font-family: -apple-system, "Apple SD Gothic Neo", sans-serif;
+    background: #f4f1ea;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 48px 16px;
+  }
+  h1 { margin-bottom: 8px; }
+  p { margin: 6px 0; }
+  #message { font-size: 1.2rem; min-height: 1.6em; margin: 20px 0; font-weight: 600; }
+  input {
+    font-size: 1.1rem;
+    padding: 8px 12px;
+    width: 120px;
+    text-align: center;
+    border: 2px solid #999;
+    border-radius: 8px;
+  }
+  button {
+    font-size: 1.1rem;
+    padding: 8px 18px;
+    margin-left: 6px;
+    border: none;
+    border-radius: 8px;
+    background: #2f6f4e;
+    color: #fff;
+    cursor: pointer;
+  }
+  button:hover { background: #255a3f; }
+  #history { margin-top: 20px; color: #555; }
+</style>
+</head>
+<body>
+  <h1>숫자 맞히기 게임</h1>
+  <p>1부터 100 사이의 숫자를 맞혀 보세요.</p>
+  <p>남은 기회: <span id="left">7</span>번</p>
+
+  <div id="message">숫자를 입력하세요!</div>
+
+  <div>
+    <input id="guess" type="number" min="1" max="100" autofocus>
+    <button id="submit">확인</button>
+    <button id="restart" style="display:none">다시 하기</button>
+  </div>
+
+  <div id="history"></div>
+
+<script>
+  const MAX_TRIES = 7;
+  let answer, tries, finished;
+
+  const $ = (id) => document.getElementById(id);
+  const input = $("guess");
+
+  function start() {
+    answer = Math.floor(Math.random() * 100) + 1;
+    tries = MAX_TRIES;
+    finished = false;
+    $("left").textContent = tries;
+    $("message").textContent = "숫자를 입력하세요!";
+    $("history").textContent = "";
+    $("restart").style.display = "none";
+    $("submit").style.display = "";
+    input.value = "";
+    input.disabled = false;
+    input.focus();
+  }
+
+  function end(text) {
+    finished = true;
+    $("message").textContent = text;
+    $("restart").style.display = "";
+    $("submit").style.display = "none";
+    input.disabled = true;
+  }
+
+  function check() {
+    if (finished) return;
+    const n = Number(input.value);
+    if (!Number.isInteger(n) || n < 1 || n > 100) {
+      $("message").textContent = "1~100 사이의 정수를 입력하세요.";
+      return;
+    }
+
+    tries--;
+    $("left").textContent = tries;
+    $("history").textContent += (($("history").textContent ? ", " : "내가 입력한 숫자: ") + n);
+
+    if (n === answer) {
+      end(`정답입니다! ${MAX_TRIES - tries}번 만에 맞혔어요 🎉`);
+    } else if (tries === 0) {
+      end(`아쉬워요. 정답은 ${answer}였습니다.`);
+    } else {
+      $("message").textContent = n < answer ? "더 큰 숫자예요 ⬆️" : "더 작은 숫자예요 ⬇️";
+    }
+    input.value = "";
+    input.focus();
+  }
+
+  $("submit").addEventListener("click", check);
+  $("restart").addEventListener("click", start);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") check(); });
+
+  start();
+</script>
+</body>
+</html>
